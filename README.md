@@ -1,50 +1,50 @@
 # Selfinity Backend
 
-Selfinity — инструмент самоанализа, основанный на расширенной версии колеса баланса. Приложение помогает фиксировать состояния по жизненным сферам, выявлять конкретные проблемы и подбирать для них простые действия.
+Selfinity is a self-analysis tool built on an extended “wheel of life” model. It helps users track the state of key life areas, identify concrete problems, and map each one to an actionable step.
 
-## Концепция продукта
+## Product Concept
 
-- **8 сфер внимания**: здоровье, духовность, друзья, любовь/семья, работа и доход, дом, развлечения, отдых.
-- **Рабочие листы**: для каждой сферы хранятся оценка (0–100), конкретные проблемы и точечные решения 1:1 к проблемам.
-- **Короткий цикл обратной связи**: пользователь еженедельно обновляет оценки и корректирует действия, превращая саморазвитие в управляемый процесс.
-- **Ключевые сущности (план)**: пользователь → набор привычек/экшенов → логи выполнения и аналитика.
+- **Eight focus areas**: health, spirituality, friends, love/family, work & income, home, fun, rest.
+- **Working sheets**: every area stores a score (0–100), a list of specific problems, and one matching action per problem.
+- **Tight feedback loop**: users review scores weekly and adjust actions, turning self-improvement into a manageable process.
+- **Core domain plan**: user → habit/action set → execution logs and analytics.
 
-## Текущий статус
+## Current Status
 
-> Фаза 1: подготовлена базовая серверная инфраструктура. Реализован каркас FastAPI‑приложения с конфигурацией, подключением к БД, тестовой эндпоинтом `/health`, настройкой Alembic и pytest. Дальнейшие фазы добавят бизнес-логику, аутентификацию и фронтенд.
+> Phase 1: backend foundation in place. We have a FastAPI skeleton with configuration, database connectivity, `/health` endpoint, Alembic migrations, and pytest. Future phases introduce domain models, auth, and frontend.
 
-## Технологии
+## Tech Stack
 
-- **Язык**: Python 3.11+
+- **Language**: Python 3.11+
 - **Web/API**: FastAPI, Uvicorn
-- **База данных**: PostgreSQL (asyncpg, SQLAlchemy 2.x, Alembic)
-- **Тестирование**: pytest, pytest-asyncio, httpx
-- **Контейнеризация**: Docker, docker-compose
-- **Прочее**: pydantic-settings, Redis (запланировано по спецификации)
+- **Database**: PostgreSQL (asyncpg, SQLAlchemy 2.x, Alembic)
+- **Testing**: pytest, pytest-asyncio, httpx
+- **Containers**: Docker, docker-compose
+- **Other**: pydantic-settings, Redis (planned by spec)
 
-## Структура репозитория
+## Repository Structure
 
 ```
 backend/
 ├── app/
-│   ├── api/           # Роуты FastAPI
-│   ├── core/          # Конфигурация и база данных
-│   ├── models/        # SQLAlchemy модели (база DeclarativeBase)
-│   └── main.py        # Точка входа FastAPI
-├── alembic/           # Скрипты миграций
-├── tests/             # pytest-фикстуры и тесты
-├── requirements.txt   # Python-зависимости
-├── docker-compose.yml # Локальная разработка в контейнерах
-├── Dockerfile         # Образ backend-сервиса
-├── .env.example       # Пример переменных окружения
+│   ├── api/           # FastAPI routes
+│   ├── core/          # configuration & database
+│   ├── models/        # SQLAlchemy declarative base
+│   └── main.py        # FastAPI entry point
+├── alembic/           # migration scripts
+├── tests/             # pytest fixtures and tests
+├── requirements.txt   # Python dependencies
+├── docker-compose.yml # local development stack
+├── Dockerfile         # backend image
+├── .env.example       # sample environment variables
 └── README.md
 ```
 
-Дополнительные материалы (видение продукта, декомпозиция, стек) лежат в директории `doc/`.
+Product documentation (vision, decomposition, stack) lives under `doc/`.
 
-## Подготовка окружения (без Docker)
+## Local Environment Without Docker
 
-1. **Создайте виртуальное окружение и поставьте зависимости**
+1. **Create a virtualenv and install dependencies**
    ```bash
    cd backend
    python -m venv .venv
@@ -52,64 +52,64 @@ backend/
    pip install -r requirements.txt
    ```
 
-2. **Сконфигурируйте переменные окружения**
+2. **Configure environment variables**
    ```bash
    cp .env.example .env
    ```
-   Отредактируйте `DATABASE_URL` (формат `postgresql+asyncpg://USER:PASS@HOST:PORT/DB`).
+   Update `DATABASE_URL` (format `postgresql+asyncpg://USER:PASS@HOST:PORT/DB`).
 
-3. **Запустите приложение**
+3. **Run the application**
    ```bash
    uvicorn app.main:app --reload
    ```
-   Эндпоинт проверки готовности: `http://localhost:8000/health`.
+   Health check endpoint: `http://localhost:8000/health`.
 
-## Запуск через Docker Compose
+## Docker Compose Spin-up
 
 ```bash
 cd backend
 docker compose up --build
 ```
 
-Сервисы:
-- `postgres` — PostgreSQL 15 (данные в томе `postgres_data`).
-- `app` — FastAPI с автообновлением кода.
+Services:
+- `postgres` — PostgreSQL 15 with persistent volume `postgres_data`
+- `app` — FastAPI with hot reload
 
-После старта API доступно по `http://localhost:8000/health`. Остановка: `docker compose down`.
+After startup the API is reachable at `http://localhost:8000/health`. Shut down with `docker compose down`.
 
-## Миграции Alembic
+## Alembic Migrations
 
-1. Применить все миграции:
+1. Apply migrations:
    ```bash
    alembic upgrade head
    ```
-2. Сгенерировать новую миграцию (после изменений в моделях):
+2. Generate a new migration (after model changes):
    ```bash
    alembic revision --autogenerate -m "describe change"
    ```
-3. При необходимости отметить состояние без применения:
+3. (Optional) Mark the current state without applying:
    ```bash
    alembic stamp head
    ```
 
-> ⚠️ Перед автогенерацией убедитесь, что текущая база синхронизирована (`upgrade head`), иначе Alembic сообщит, что целевая БД не в актуальном состоянии.
+> ⚠️ Ensure the target database is up to date (`alembic upgrade head`) before running `revision --autogenerate`. Otherwise Alembic will refuse to generate the next revision.
 
-## Тестирование
+## Testing
 
 ```bash
 source .venv/bin/activate
 pytest
 ```
 
-Фикстуры используют in-memory SQLite (`sqlite+aiosqlite:///:memory:`), поэтому отдельная инфраструктура не нужна.
+Fixtures rely on in-memory SQLite (`sqlite+aiosqlite:///:memory:`), so no extra services are needed.
 
-## Пример запроса
+## Example Request
 
 ```bash
-curl http://localhost:8000/health | jq
+curl http://localhost:8000/health
 ```
 
-Ожидаемый ответ:
+Expected response:
 
 ```json
 {
@@ -119,12 +119,12 @@ curl http://localhost:8000/health | jq
 }
 ```
 
-## Дальнейшие шаги (согласно документации)
+## Next Steps (per roadmap)
 
-- Ввести модели пользователей, привычек и логов.
-- Реализовать аутентификацию (JWT).
-- Добавить Redis для кеша и сессий.
-- Подготовить frontend (React + TypeScript + MUI/Tailwind).
-- Настроить CI/CD и окружения AWS/GCP.
+- Introduce user, habit, and log models.
+- Implement JWT authentication.
+- Add Redis for caching and sessions.
+- Build the frontend (React + TypeScript + MUI/Tailwind).
+- Wire up CI/CD and cloud environments on AWS/GCP.
 
-Вся детализация по этапам разработки — в `doc/phase-1.md` и соседних драйверах.
+See `doc/phase-1.md` and related files for the full development plan.
