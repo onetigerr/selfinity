@@ -1,4 +1,3 @@
-import os
 import sys
 from collections.abc import AsyncGenerator
 
@@ -9,8 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 sys.modules.setdefault("multipart", python_multipart_multipart)
 from fastapi.testclient import TestClient
-
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:?cache=shared"
 
 from app.core.config import get_settings  # noqa: E402
 from app.core.database import get_session_factory, init_engine  # noqa: E402

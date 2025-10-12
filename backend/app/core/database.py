@@ -6,6 +6,7 @@ from collections.abc import AsyncGenerator
 from typing import Optional
 
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.pool import NullPool
 
 from .config import get_settings
 
@@ -17,7 +18,9 @@ def init_engine(database_url: Optional[str] = None, *, echo: bool = False) -> No
     """Initialise SQLAlchemy async engine and session factory."""
     global engine, AsyncSessionLocal  # Module-level singletons configured once at startup.
     url = database_url or get_settings().database_url
-    engine = create_async_engine(url, echo=echo)
+    # Use NullPool to avoid asyncpg "another operation is in progress" issues
+    # under concurrent tests and mixed event-loop scenarios.
+    engine = create_async_engine(url, echo=echo, poolclass=NullPool)
     AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 

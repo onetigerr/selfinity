@@ -1,0 +1,4 @@
+/backend/.env
+/doc/phase-*.md
+frontend/node_modules
+frontend/dist

@@ -8,3 +8,7 @@ class Base(DeclarativeBase):
 
     pass
 
+
+from .user import LanguagePreference, User  # noqa: E402
+
+__all__ = ["Base", "User", "LanguagePreference"]
