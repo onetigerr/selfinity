@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Root wrapper to prefer backend virtualenv's pytest
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BACKEND_DIR="$ROOT_DIR/backend"
+VENV_PYTEST="$BACKEND_DIR/.venv/bin/pytest"
+
+if [[ -x "$VENV_PYTEST" ]]; then
+  # Run from repo root, but use backend's pytest, config and tests path.
+  exec "$VENV_PYTEST" -c "$BACKEND_DIR/pytest.ini" "$BACKEND_DIR/tests" "$@"
+fi
+
+echo "[warn] backend/.venv/bin/pytest not found; using system pytest."
+echo "[hint] Run 'make backend-venv' to install test deps in backend/.venv." >&2
+exec pytest -c "$BACKEND_DIR/pytest.ini" "$BACKEND_DIR/tests" "$@"

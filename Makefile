@@ -9,7 +9,7 @@ API_HOST ?= 127.0.0.1
 API_PORT ?= 8000
 BASE_URL := http://$(API_HOST):$(API_PORT)
 
-.PHONY: help db-up db-down migrate api-run api-up api-stop fe-dev fe-build fe-up fe-stop demo test
+.PHONY: help db-up db-down migrate api-run api-up api-stop fe-dev fe-build fe-up fe-stop demo test backend-venv
 
 help: ## Show available commands
 	@grep -E '^[a-zA-Z_-]+:.*?## ' Makefile | sort | awk 'BEGIN {FS=":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
@@ -48,5 +48,11 @@ demo: ## Run demo auth script against BASE_URL (register -> login -> me)
 	cd $(BACKEND_DIR) && BASE_URL=$(BASE_URL) ./scripts/demo_auth.sh
 
 test: ## Run backend tests
-	cd $(BACKEND_DIR) && pytest -q
+	cd $(BACKEND_DIR) && if [ -x .venv/bin/pytest ]; then .venv/bin/pytest -q; else pytest -q; fi
 
+backend-venv: ## Create venv and install backend deps
+	cd $(BACKEND_DIR) \
+	&& python3 -m venv .venv \
+	&& . .venv/bin/activate \
+	&& python -m pip install -U pip \
+	&& python -m pip install -r requirements.txt
