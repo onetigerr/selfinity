@@ -27,26 +27,18 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
-
-
-def _is_sqlite(url: str) -> bool:
-    return url.startswith("sqlite")
-
-
-def run_migrations_offline() -> None:
-    """Run migrations in 'offline' mode."""
-    settings = get_settings()
-    url = settings.database_url
-    config.set_main_option("sqlalchemy.url", url)
-    render_as_batch = _is_sqlite(url)
-
-    context.configure(
-        url=url,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
-        render_as_batch=render_as_batch,
-    )
+    def run_migrations_offline() -> None:
+        """Run migrations in 'offline' mode."""
+        settings = get_settings()
+        url = settings.database_url
+        config.set_main_option("sqlalchemy.url", url)
+    
+        context.configure(
+            url=url,
+            target_metadata=target_metadata,
+            literal_binds=True,
+            dialect_opts={"paramstyle": "named"},
+        )
 
     with context.begin_transaction():
         context.run_migrations()

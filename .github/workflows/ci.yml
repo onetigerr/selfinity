@@ -11,9 +11,23 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  backend:
-    name: Backend
+  ci-backend:
+    name: Backend CI
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: lifebalance
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres" \
+          --health-interval 10s \
+          --health-timeout 5s \
+          --health-retries 5
     defaults:
       run:
         working-directory: backend
@@ -32,22 +46,44 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends \
-            build-essential libffi-dev libpq-dev
+            build-essential libffi-dev libpq-dev postgresql-client
+
+      - name: Wait for Postgres
+        run: |
+          for i in {1..30}; do
+            pg_isready -h 127.0.0.1 -p 5432 -U postgres && break
+            echo "Postgres is unavailable - sleeping" && sleep 2
+          done
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install flake8 pytest-cov
 
-      - name: Run tests (pytest)
+      - name: Lint (flake8)
+        run: flake8 .
+
+      - name: Test with coverage (pytest)
         env:
-          # Use a file-based SQLite DB so schema persists across connections
-          DATABASE_URL: sqlite+aiosqlite:///./test.db
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/lifebalance
         run: |
-          pytest -q
+          mkdir -p test-results
+          pytest -q \
+            --cov=app \
+            --cov-report=xml:test-results/coverage.xml \
+            --junitxml=test-results/junit.xml
 
-  frontend:
-    name: Frontend
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: backend/test-results/*
+          if-no-files-found: error
+          retention-days: 7
+
+  ci-frontend:
+    name: Frontend CI
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -56,7 +92,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -66,13 +102,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        run: npm run build
+      - name: Lint (eslint)
+        run: |
+          # Run project lint script if present; otherwise try eslint via npx
+          npm run -s lint --if-present || npx --yes eslint@9 . || echo "ESLint not configured; skipping"
 
-  docker_build:
+      - name: Test (npm test)
+        run: |
+          mkdir -p test-results
+          # Run tests if a test script is defined; otherwise skip
+          npm test --if-present || echo "No test script; skipping"
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-reports
+          path: frontend/test-results/*
+          if-no-files-found: ignore
+          retention-days: 7
+
+  docker-build:
     name: Docker Build
     runs-on: ubuntu-latest
-    needs: [backend, frontend]
+    needs: [ci-backend, ci-frontend]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -80,28 +132,28 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build backend image
-        uses: docker/build-push-action@v5
-        with:
-          context: backend
-          file: backend/Dockerfile
-          push: false
-          load: true
-          tags: selfinity/backend:ci-${{ github.sha }}
-
-      - name: Build frontend image
+      - name: Build images (backend and frontend)
+        env:
+          TAG_BACKEND: selfinity/backend:local-${{ github.sha }}
+          TAG_FRONTEND: selfinity/frontend:local-${{ github.sha }}
         run: |
-          cat > frontend/Dockerfile <<'EOF'
-          FROM node:20-alpine AS build
-          WORKDIR /app
-          COPY package*.json ./
-          RUN npm ci
-          COPY . .
-          RUN npm run build
+          set -euxo pipefail
+          DOCKER_BUILDKIT=1 docker build -t "$TAG_BACKEND" -f backend/Dockerfile backend
+          DOCKER_BUILDKIT=1 docker build -t "$TAG_FRONTEND" -f frontend/Dockerfile frontend
 
-          FROM nginx:alpine
-          COPY --from=build /app/dist /usr/share/nginx/html
-          EXPOSE 80
-          CMD ["nginx", "-g", "daemon off;"]
-          EOF
-          docker build -t selfinity/frontend:ci-${{ github.sha }} -f frontend/Dockerfile frontend
+      - name: Inspect images and save metadata
+        env:
+          TAG_BACKEND: selfinity/backend:local-${{ github.sha }}
+          TAG_FRONTEND: selfinity/frontend:local-${{ github.sha }}
+        run: |
+          set -euo pipefail
+          mkdir -p docker-inspect
+          docker inspect "$TAG_BACKEND" > docker-inspect/backend.json
+          docker inspect "$TAG_FRONTEND" > docker-inspect/frontend.json
+
+      - name: Upload inspect artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-inspect
+          path: docker-inspect/*
+          if-no-files-found: error

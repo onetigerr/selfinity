@@ -101,7 +101,7 @@ source .venv/bin/activate
 pytest
 ```
 
-Fixtures rely on in-memory SQLite (`sqlite+aiosqlite:///:memory:`), so no extra services are needed.
+Tests run against PostgreSQL. In CI a Postgres service is provided and `DATABASE_URL` points to it. For local runs, set `DATABASE_URL` to your Postgres instance (e.g. `postgresql+asyncpg://user:pass@localhost:5432/dbname`).
 
 ## Example Request
 

@@ -41,7 +41,7 @@ async def async_client(app_instance) -> AsyncGenerator[AsyncClient, None]:
 
 @pytest.fixture()
 async def test_db() -> AsyncGenerator[AsyncSession, None]:
-    """Yield a database session bound to the in-memory SQLite database."""
+    """Yield a database session bound to the configured database (Postgres in CI)."""
     session_factory = get_session_factory()
     async with session_factory() as session:
         yield session
