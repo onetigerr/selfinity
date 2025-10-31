@@ -8,7 +8,9 @@ router = APIRouter()
 
 
 @router.get("", summary="Health check")
-async def health_check(session: AsyncSession = Depends(get_db)) -> dict[str, str]:
+async def health_check(
+    session: AsyncSession = Depends(get_db),
+) -> dict[str, str]:
     """Verify application and database availability."""
     await session.execute(text("SELECT 1"))
 

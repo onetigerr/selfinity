@@ -59,7 +59,7 @@ jobs:
           pip install flake8 pytest-cov
 
       - name: Lint (flake8)
-        run: flake8 .
+        run: flake8 . --max-line-length=120
 
       - name: Test with coverage (pytest)
         env:

@@ -22,7 +22,12 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.create_table(
         "users",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True, nullable=False),
+        sa.Column(
+            "id",
+            sa.dialects.postgresql.UUID(as_uuid=True),
+            primary_key=True,
+            nullable=False,
+        ),
         sa.Column("email", sa.String(length=320), nullable=False, unique=True),
         sa.Column("password_hash", sa.String(length=255), nullable=False),
         sa.Column(
@@ -31,7 +36,12 @@ def upgrade() -> None:
             nullable=False,
             server_default="ru",
         ),
-        sa.Column("created_at", sa.DateTime(timezone=True), nullable=False, server_default=sa.func.now()),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            nullable=False,
+            server_default=sa.func.now(),
+        ),
         sa.Column(
             "updated_at",
             sa.DateTime(timezone=True),
@@ -43,4 +53,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     op.drop_table("users")
-    sa.Enum("ru", "en", name="language_preference_enum").drop(op.get_bind(), checkfirst=True)
+    sa.Enum("ru", "en", name="language_preference_enum").drop(
+        op.get_bind(),
+        checkfirst=True,
+    )

@@ -1,5 +1,4 @@
 """Pydantic schemas for authentication flows."""
-
 from __future__ import annotations
 
 from datetime import datetime
@@ -40,4 +39,3 @@ class TokenResponse(BaseModel):
 
     access_token: str
     token_type: str = "bearer"
-

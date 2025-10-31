@@ -9,7 +9,9 @@ class Settings(BaseSettings):
     app_name: str = "Selfinity API"
     app_version: str = "0.1.0"
     environment: str = "development"
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/lifebalance"
+    database_url: str = (
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/lifebalance"
+    )
 
     # JWT / security settings
     jwt_secret_key: str = "change-me-in-.env"

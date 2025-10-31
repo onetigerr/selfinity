@@ -10,7 +10,6 @@ from __future__ import annotations
 from typing import Sequence, Union
 
 from alembic import op
-import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision: str = "cc2b2a3a9d9e"
@@ -21,10 +20,15 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     # Set server default to 'en' for language_preference
-    op.execute("ALTER TABLE users ALTER COLUMN language_preference SET DEFAULT 'en';")
+    op.execute(
+        "ALTER TABLE users ALTER COLUMN "
+        "language_preference SET DEFAULT 'en';"
+    )
 
 
 def downgrade() -> None:
     # Revert server default back to 'ru'
-    op.execute("ALTER TABLE users ALTER COLUMN language_preference SET DEFAULT 'ru';")
-
+    op.execute(
+        "ALTER TABLE users ALTER COLUMN "
+        "language_preference SET DEFAULT 'ru';"
+    )

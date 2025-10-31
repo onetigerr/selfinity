@@ -24,4 +24,3 @@ async def test_health_endpoint_async(async_client):
         "timestamp": "2025-10-10T15:06:00Z",
         "database": "connected",
     }
-

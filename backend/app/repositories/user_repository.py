@@ -1,5 +1,4 @@
 """Async repository for User entities."""
-
 from __future__ import annotations
 
 import uuid
@@ -48,4 +47,3 @@ class UserRepository:
         user = result.scalar_one()
         await self.session.commit()
         return user
-

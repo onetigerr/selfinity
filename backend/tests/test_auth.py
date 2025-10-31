@@ -29,7 +29,8 @@ def test_register_success(client):
     data = r.json()
     assert data["email"] == payload["email"]
     assert data["language_preference"] == "en"
-    assert "id" in data and "created_at" in data
+    assert "id" in data
+    assert "created_at" in data
 
 
 def test_register_duplicate_email(client):
@@ -63,7 +64,10 @@ def test_login_wrong_password(client):
     email = f"wrong_{uuid.uuid4().hex[:8]}@example.com"
     client.post("/auth/register", json={"email": email, "password": "secret12"})
 
-    r = client.post("/auth/login", json={"email": email, "password": "badpass"})
+    r = client.post(
+        "/auth/login",
+        json={"email": email, "password": "badpass"},
+    )
     assert r.status_code == 401
     assert r.json()["detail"] == "Invalid credentials"
 
@@ -71,4 +75,7 @@ def test_login_wrong_password(client):
 def test_get_me_unauthorized(client):
     r = client.get("/auth/me")
     assert r.status_code == 401
-    assert r.json()["detail"] in {"Missing Authorization header", "Invalid Authorization header"}
+    assert r.json()["detail"] in {
+        "Missing Authorization header",
+        "Invalid Authorization header",
+    }

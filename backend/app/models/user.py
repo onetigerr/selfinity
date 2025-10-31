@@ -36,7 +36,7 @@ class User(Base):
         Enum(
             LanguagePreference,
             name="language_preference_enum",
-            values_callable=lambda x: [e.value for e in x],  # persist enum values ('ru','en')
+            values_callable=lambda x: [e.value for e in x],
         ),
         nullable=False,
         default=LanguagePreference.EN,
