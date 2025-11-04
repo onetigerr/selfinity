@@ -1,0 +1,22 @@
+## Copy this file to 'infra/private.auto.tfvars' and fill real values.
+
+# Full Docker image reference (Docker Hub or other registry)
+# Example: "myregistry/selfinity:latest" or "mydockerhub/selfinity:latest"
+docker_image = "mydockerhub/selfinity:latest"
+
+# PostgreSQL Flexible Server admin credentials
+pg_admin_username = "pgadmin"
+pg_admin_password = "CHANGE_THIS_SECURE_PASSWORD"
+
+# Application secret key (used by Web App)
+secret_key = "CHANGE_THIS_SECRET_KEY"
+
+# Optional overrides (uses defaults if not set)
+# location                 = "northeurope"
+# resource_group_name      = "selfinity-rg"
+# app_service_plan_name    = "selfinity-plan"
+# web_app_name             = "selfinity-app"
+# storage_account_name     = "selfinitystorage"
+# key_vault_name           = "selfinity-kv"
+# pg_server_name           = "selfinity-pg"
+# pg_database_name         = "selfinitydb"

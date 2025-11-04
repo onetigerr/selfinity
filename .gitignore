@@ -2,3 +2,12 @@
 /doc/phase-*.md
 frontend/node_modules
 frontend/dist
+# Terraform local secrets
+infra/private.auto.tfvars
+infra/terraform.tfvars
+infra/.env
+infra/.tfplan
+infra/.tfplan.*
+infra/.terraform/
+infra/terraform.tfstate
+infra/terraform.tfstate.backup

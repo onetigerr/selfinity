@@ -162,13 +162,22 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Tag Docker image for DockerHub
+      - name: Tag backend image for DockerHub
         if: github.event_name == 'push'
         run: |
           docker tag \
             selfinity/backend:local-${{ github.sha }} \
             ${{ secrets.DOCKERHUB_USERNAME }}/selfinity:latest
 
-      - name: Push Docker image
+      - name: Tag frontend image for DockerHub
         if: github.event_name == 'push'
-        run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/selfinity:latest
+        run: |
+          docker tag \
+            selfinity/frontend:local-${{ github.sha }} \
+            ${{ secrets.DOCKERHUB_USERNAME }}/selfinity-frontend:latest
+
+      - name: Push Docker images
+        if: github.event_name == 'push'
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/selfinity:latest
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/selfinity-frontend:latest
