@@ -7,6 +7,7 @@ infra/private.auto.tfvars
 infra/terraform.tfvars
 infra/.env
 infra/init.sh
+
 infra/.tfplan
 infra/.tfplan.*
 infra/.terraform/
