@@ -146,7 +146,7 @@ resource "azurerm_linux_web_app" "selfinity_app" {
     DOCKER_REGISTRY_SERVER_URL = "https://index.docker.io/v1"
 
     # Database URL
-    DATABASE_URL = "postgresql://${azurerm_postgresql_flexible_server.selfinity_pg.administrator_login}:${azurerm_postgresql_flexible_server.selfinity_pg.administrator_password}@${azurerm_postgresql_flexible_server.selfinity_pg.fqdn}:5432/${azurerm_postgresql_flexible_server_database.selfinity_db.name}?sslmode=require"
+    DATABASE_URL = "postgresql+asyncpg://${azurerm_postgresql_flexible_server.selfinity_pg.administrator_login}:${azurerm_postgresql_flexible_server.selfinity_pg.administrator_password}@${azurerm_postgresql_flexible_server.selfinity_pg.fqdn}:5432/${azurerm_postgresql_flexible_server_database.selfinity_db.name}?sslmode=require"
 
     # Secret Key - Reference from Key Vault
     SECRET_KEY = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.secret_key.id})"
